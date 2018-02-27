@@ -130,25 +130,85 @@ class Hopscotch extends Component {
 
     buildTour = () => {
         const { tour } = this.state;
-        const { id, generalStepConfig } = this.props;
+        const {
+            id,
+            generalStepConfig,
+            bubbleWidth,
+            bubblePadding,
+
+            smoothScroll,
+            scrollDuration,
+            scrollTopMargin,
+
+            showCloseButton,
+            showPrevButton,
+            showNextButton,
+
+            arrowWidth,
+
+            skipIfNoElement,
+            nextOnTargetClick,
+
+            onNext,
+            onPrev,
+            onStart,
+            onEnd,
+            onClose,
+            onError,
+
+            i18n
+        } = this.props;
+
+        let steps = [];
 
         if (!isEqual(generalStepConfig, Step.defaultProps)) {
-            return {
-                id,
-                steps: tour.map(t => ({ ...t, ...generalStepConfig })),
-            };
+            steps = tour.map(t => ({ ...generalStepConfig, ...t }));
+        } else {
+            steps = tour;
         }
+
+        steps = steps.filter(s => s);
 
         return {
             id,
-            steps: tour,
+
+            bubbleWidth,
+            bubblePadding,
+
+            smoothScroll,
+            scrollDuration,
+            scrollTopMargin,
+
+            showCloseButton,
+            showPrevButton,
+            showNextButton,
+
+            arrowWidth,
+
+            skipIfNoElement,
+            nextOnTargetClick,
+
+            onNext,
+            onPrev,
+            onStart,
+            onEnd,
+            onClose,
+            onError,
+
+            i18n,
+
+            steps
         };
     }
 
-    updateTour = (newTour = {}) => {
-        this.setState(prevState => ({
-            tour: [...prevState.tour, newTour],
-        }));
+    updateTour = (index, newTour = {}) => {
+        this.setState((prevState) => {
+            const { tour } = prevState;
+
+            tour[index] = newTour;
+
+            return { tour };
+        });
     }
 
     clearhole = () => {

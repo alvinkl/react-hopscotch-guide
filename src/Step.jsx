@@ -133,7 +133,7 @@ class Step extends Component {
             onCTA,
         };
 
-        this.context.updateTour(tour);
+        this.context.updateTour(index, tour);
     }
 
     render() {
