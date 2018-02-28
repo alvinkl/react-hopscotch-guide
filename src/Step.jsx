@@ -6,11 +6,12 @@ class Step extends Component {
     static contextTypes = {
         hopscotch: T.object,
         updateTour: T.func,
+        updateTaken: T.func,
     };
 
     static propTypes = {
         index: T.number.isRequired,
-        placement: T.oneOf(['top', 'bottom', 'right', 'left']).isRequired,
+        placement: T.oneOf(['top', 'bottom', 'right', 'left']),
 
         title: T.string,
         content: T.string,
@@ -41,6 +42,8 @@ class Step extends Component {
     };
 
     static defaultProps = {
+        placement: 'right',
+
         title: '',
         content: '',
         ctaLabel: '',
@@ -94,10 +97,6 @@ class Step extends Component {
             showSkip,
             fixedElement,
             nextOnTargetClick,
-            onPrev,
-            onNext,
-            onShow,
-            onCTA,
         } = this.props;
 
         const target = this.node;
@@ -127,19 +126,37 @@ class Step extends Component {
             fixedElement,
             nextOnTargetClick,
 
-            onPrev,
-            onNext,
-            onShow,
-            onCTA,
+            onPrev: this.onPrev,
+            onNext: this.onNext,
+            onShow: this.onShow,
+            onCTA: this.onCTA,
         };
 
         this.context.updateTour(index, tour);
     }
 
-    render() {
-        console.log(this.context);
-        console.log('node', this.node);
+    /* Step functions */
+    onPrev = () => {
+        this.props.onPrev();
+    }
 
+    onNext = () => {
+        this.props.onNext();
+    }
+
+    onShow = () => {
+        this.context.updateTaken(this.props.index);
+
+        this.props.onShow();
+    }
+
+    onCTA = () => {
+        this.props.onCTA();
+    }
+
+    /* End of Step functions */
+
+    render() {
         const childrenWithProps = React.cloneElement(this.props.children, {
             ref: (node) => {
                 this.node = node;

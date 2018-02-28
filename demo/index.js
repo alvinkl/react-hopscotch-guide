@@ -9,7 +9,6 @@ class App extends React.Component {
     };
 
     handleActiveGuide = (e) => {
-        e.preventDefault();
         this.setState({ activeGuide: true });
     };
 
@@ -19,6 +18,7 @@ class App extends React.Component {
         return (
             <Hopscotch
                 id="hello-hopscotch"
+                totalSteps={5}
                 active={activeGuide}
                 i18n={{
                     nextBtn: 'Lanjut',
@@ -29,13 +29,16 @@ class App extends React.Component {
                 showPrevButton
                 showClosebutton
                 scrollTopMargin={100}
+                onEnd={console.log}
+                generalStepConfig={{
+                    placement: 'top'
+                }}
             >
                 <div>
                     <Step
                         index={0}
                         title="My Header"
                         content="This is the header of my page."
-                        placement="bottom"
                     >
                         <h1 id="header">My First </h1>
                     </Step>
@@ -43,7 +46,6 @@ class App extends React.Component {
                         index={1}
                         title="My content"
                         content="Here is where I put my content."
-                        placement="bottom"
                     >
                         <div id="content">
                             <p>Content goes here...</p>
@@ -69,6 +71,7 @@ class App extends React.Component {
                             <p>Content goes here...</p>
                         </div>
                     </Step>
+
                     <button type="button" onClick={this.handleActiveGuide}>
                         Start tour
                     </button>

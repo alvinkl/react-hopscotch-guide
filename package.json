@@ -21,8 +21,8 @@
     "main": "index.js",
     "scripts": {
         "lint": "eslint ./components",
-        "test": "mocha",
         "demo": "webpack-dev-server",
+        "test": "mocha",
         "prepublish": "npm test"
     },
     "peerDependencies": {

@@ -19,6 +19,7 @@ const stepsPropsWithoutRequired = withoutRequired(Step.propTypes, [
 class Hopscotch extends Component {
     static propTypes = {
         id: T.string.isRequired,
+        totalSteps: T.number.isRequired,
 
         bubbleWidth: T.number,
         bubblePadding: T.number,
@@ -51,8 +52,6 @@ class Hopscotch extends Component {
             closeTooltip: T.string,
             stepNums: T.array,
         }),
-
-        generalStepConfig: T.shape(stepsPropsWithoutRequired),
 
         active: T.bool,
 
@@ -92,14 +91,13 @@ class Hopscotch extends Component {
             stepNums: [],
         },
 
-        generalStepConfig: Step.defaultProps,
-
         active: T.bool,
     }
 
     static childContextTypes = {
         hopscotch: T.object,
         updateTour: T.func,
+        updateTaken: T.func,
     }
 
     constructor(props) {
@@ -110,10 +108,22 @@ class Hopscotch extends Component {
 
     state = {
         tour: [],
+        taken: [],
     }
 
     getChildContext() {
-        return { hopscotch: this.hopscotch, updateTour: this.updateTour };
+        return {
+            hopscotch: this.hopscotch,
+            updateTour: this.updateTour,
+            updateTaken: this.updateTakenGuide
+        };
+    }
+
+    componentDidMount() {
+        const { totalSteps } = this.props;
+
+        const taken = Array(...{ length: totalSteps }).map(() => false);
+        this.setState({ taken });
     }
 
     componentWillReceiveProps(nextProps) {
@@ -124,7 +134,41 @@ class Hopscotch extends Component {
         // const {} = this.props.config;
     }
 
+    /* Hopscotch Functions */
+    onNext = () => {
+        this.props.onNext();
+    }
+
+    onPrev = () => {
+        this.props.onPrev();
+    }
+
+    onStart = () => {
+        this.props.onStart(this.hopscotch);
+    }
+
+    onEnd = () => {
+        const taken = this.state.taken.map(t => !!t);
+
+        this.props.onEnd(this.hopscotch, taken);
+    }
+
+    onClose = () => {
+        const taken = this.state.taken.map(t => !!t);
+
+        this.props.onClose(this.hopscotch, taken);
+    }
+
+    onError = () => {
+        this.props.onError(this.hopscotch);
+    }
+    /* End of Hopscotch Functions */
+
+
     startTour = () => {
+        console.log('startTour', this.buildTour());
+        window.hopscotch = this.hopscotch;
+        window.tour = this.buildTour();
         this.hopscotch.startTour(this.buildTour());
     }
 
@@ -132,7 +176,6 @@ class Hopscotch extends Component {
         const { tour } = this.state;
         const {
             id,
-            generalStepConfig,
             bubbleWidth,
             bubblePadding,
 
@@ -149,25 +192,16 @@ class Hopscotch extends Component {
             skipIfNoElement,
             nextOnTargetClick,
 
-            onNext,
-            onPrev,
-            onStart,
-            onEnd,
-            onClose,
-            onError,
 
             i18n
         } = this.props;
 
-        let steps = [];
+        let steps = tour;
 
-        if (!isEqual(generalStepConfig, Step.defaultProps)) {
-            steps = tour.map(t => ({ ...generalStepConfig, ...t }));
-        } else {
-            steps = tour;
-        }
+        steps = this.filterTour(steps);
 
         steps = steps.filter(s => s);
+
 
         return {
             id,
@@ -188,17 +222,23 @@ class Hopscotch extends Component {
             skipIfNoElement,
             nextOnTargetClick,
 
-            onNext,
-            onPrev,
-            onStart,
-            onEnd,
-            onClose,
-            onError,
+            onNext: this.onNext,
+            onPrev: this.onPrev,
+            onStart: this.onStart,
+            onEnd: this.onEnd,
+            onClose: this.onClose,
+            onError: this.onError,
 
             i18n,
 
             steps
         };
+    }
+
+    filterTour = (tour = []) => {
+        const { taken } = this.state;
+
+        return taken.reduce((p, c, i) => (!c ? [...p, tour[i]] : p), []);
     }
 
     updateTour = (index, newTour = {}) => {
@@ -208,6 +248,15 @@ class Hopscotch extends Component {
             tour[index] = newTour;
 
             return { tour };
+        });
+    }
+
+    updateTakenGuide = (index) => {
+        this.setState((prevState) => {
+            const { taken } = prevState;
+            taken[index] = true;
+
+            this.setState({ taken });
         });
     }
 
